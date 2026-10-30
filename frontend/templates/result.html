@@ -1,0 +1,253 @@
+{% extends 'base.html' %}
+{% set active_page='home' %}{% set page_name='Scan Result & Forensics' %}
+{% block title %}ScamShield — Scan Result & Forensics{% endblock %}
+{% block content %}
+<div class="result-toolbar">
+  <a href="/" class="back-link">← New scan</a>
+  <div style="display:flex;gap:12px;align-items:center;">
+    <button class="btn btn-ghost" id="printReportBtn" style="padding:6px 12px;font-size:11px;">🖨 Print Forensic Report</button>
+    <span>Incident Ref: <b style="color:var(--teal)">{{ result.incident_id }}</b></span>
+  </div>
+</div>
+
+<section class="result-hero card">
+  <div>
+    <div class="eyebrow">DIGITAL FORENSIC AUDIT • {{ result.input_type }} • {{ result.model.version }}</div>
+    <h1 class="risk-title {{ 'risk-high' if result.risk>=75 else 'risk-mid' if result.risk>=45 else 'risk-low' }}">{{ result.level }}</h1>
+    <p class="result-summary">{{ result.explanation }}</p>
+    <div class="complaint-meta-bar" style="margin-top:12px;">
+      <span>SHA-256 Integrity:</span>
+      <span class="hash-pill" title="Cryptographic SHA-256 evidence fingerprint">{{ result.evidence_sha256[:20] }}...{{ result.evidence_sha256[-8:] }}</span>
+    </div>
+  </div>
+  <div class="risk-ring" style="--risk: {{ result.risk }}%">
+    <div><strong>{{ result.risk }}%</strong><small>RISK</small></div>
+  </div>
+</section>
+
+<!-- Primary Classification & Stage -->
+<section class="result-grid">
+  <div class="card result-card">
+    <span class="card-label">CLASSIFIED THREAT CATEGORY</span>
+    <h2>{{ result.scam_type }}</h2>
+    <p>Identified using multi-tier TF-IDF feature analysis and explainable rule heuristics.</p>
+  </div>
+  <div class="card result-card">
+    <span class="card-label">DETECTED ATTACK STAGE</span>
+    <h2 class="teal">{{ result.stage }}</h2>
+    <div class="stage-line">
+      <span>Contact</span><span>Trust</span><span>Pressure</span><span>Request</span>
+    </div>
+  </div>
+</section>
+
+<!-- Explainable AI (XAI) Token Attribution Card -->
+{% if result.xai_analysis and result.xai_analysis.available %}
+<section class="card xai-card">
+  <div class="section-head">
+    <div>
+      <div class="title-row">
+        <span class="spark">⚡</span>
+        <h2>Explainable AI (XAI) Feature Attribution</h2>
+      </div>
+      <p>Visualizing token weights derived from the Logistic Regression decision boundary ($\text{weight} = \text{TF-IDF} \times w_i$).</p>
+    </div>
+    <span class="brand-badge" style="background:#132a40;color:var(--teal);border-color:#20526e;">Model Explainability</span>
+  </div>
+
+  <div class="xai-highlighted-box">
+    {{ result.xai_analysis.highlighted_html|safe }}
+  </div>
+  <small class="muted" style="display:block;margin-bottom:12px;">
+    {{ result.xai_analysis.summary }} (Red marks indicate high scam weights; green marks indicate legitimate conversational context).
+  </small>
+
+  <div class="xai-tokens-grid">
+    <div class="token-table-wrap">
+      <div class="token-table-header risk">
+        <span>Top Scam-Driving Tokens</span>
+        <span>Impact Weight</span>
+      </div>
+      {% for t in result.xai_analysis.risk_tokens[:6] %}
+      <div class="token-item-row">
+        <span class="token-tag">{{ t.token }}</span>
+        <span class="token-weight-badge risk">+{{ t.impact }}</span>
+      </div>
+      {% else %}
+      <div style="padding:10px 12px;color:var(--muted);font-size:11px;">No aggressive scam keywords found.</div>
+      {% endfor %}
+    </div>
+
+    <div class="token-table-wrap">
+      <div class="token-table-header safe">
+        <span>Legitimate Context Features</span>
+        <span>Impact Weight</span>
+      </div>
+      {% for t in result.xai_analysis.safe_tokens[:6] %}
+      <div class="token-item-row">
+        <span class="token-tag">{{ t.token }}</span>
+        <span class="token-weight-badge safe">{{ t.impact }}</span>
+      </div>
+      {% else %}
+      <div style="padding:10px 12px;color:var(--muted);font-size:11px;">No strong legitimate dampeners found.</div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Brand Impersonation & Typosquatting Defense -->
+{% if result.brand_analysis %}
+<section class="card brand-card">
+  <div class="title-row">
+    <span class="target">🎯</span>
+    <h2>Brand Impersonation & Typosquatting Defense</h2>
+  </div>
+
+  {% if result.brand_analysis.impersonation_detected %}
+  <div class="brand-alert-banner danger">
+    <div>
+      <strong style="color:#ffb2bc;font-size:14px;">⚠️ Active Brand Spoofing Detected!</strong>
+      <p style="margin:4px 0 0;color:#e8c4ca;font-size:12px;">
+        This communication fraudulently mimics <b>{{ result.brand_analysis.targeted_brands|join(', ') }}</b> using deceptive sender identity, unregistered domains, or lookalike homoglyphs.
+      </p>
+    </div>
+    <span class="pill high">Score: {{ result.brand_analysis.impersonation_score }}/100</span>
+  </div>
+  <div class="flag-list">
+    {% for finding in result.brand_analysis.findings %}
+    <div class="flag"><span>!</span><span>{{ finding }}</span></div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="brand-alert-banner safe">
+    <div>
+      <strong style="color:#8bebd6;font-size:13px;">✓ No Brand Impersonation Flagged</strong>
+      <p style="margin:4px 0 0;color:#9bc9be;font-size:11px;">
+        No recognized banking, financial, or institutional brand name was abused in this payload.
+      </p>
+    </div>
+    <span class="pill low">Verified Safe Domain Profile</span>
+  </div>
+  {% endif %}
+</section>
+{% endif %}
+
+<!-- Multilingual Analysis -->
+<section class="card language-card">
+  <div class="title-row"><span class="green-dot">文</span><h2>Language & Script Analysis</h2></div>
+  <div class="result-grid">
+    <div><span class="card-label">DETECTED LANGUAGE</span><h3>{{ result.language_analysis.language }}</h3></div>
+    <div><span class="card-label">SCRIPT</span><h3>{{ result.language_analysis.script }}</h3></div>
+    <div><span class="card-label">HEURISTIC CONFIDENCE</span><h3>{{ (result.language_analysis.confidence * 100)|round|int }}%</h3></div>
+  </div>
+  {% if result.language_analysis.normalization_applied %}
+    <p>Recognized regional or Hinglish phrases were normalized to cross-examine against trained scam indicators.</p>
+    <div class="flag-list">{% for term in result.language_analysis.matched_terms[:8] %}<div class="flag"><span>↔</span><span><b>{{ term.source_phrase }}</b> → {{ term.normalized_phrase }}</span></div>{% endfor %}</div>
+  {% else %}
+    <p>Standard language pass-through applied without translation substitution.</p>
+  {% endif %}
+  <small class="muted">{{ result.language_analysis.coverage_note }}</small>
+</section>
+
+<!-- Risk Indicators & Action Guidance -->
+<section class="result-grid">
+  <div class="card">
+    <div class="title-row"><span class="red-dot">!</span><h2>Red Flag Indicators</h2></div>
+    <div class="flag-list">
+      {% for flag in result.red_flags %}
+      <div class="flag"><span>✓</span>{{ flag }}</div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="card">
+    <div class="title-row"><span class="green-dot">✓</span><h2>Recommended Action Plan</h2></div>
+    <p class="recommendation">{{ result.recommendation }}</p>
+    {% if result.urls %}
+    <h3 class="subhead">URL & Domain Heuristics</h3>
+    {% for u in result.urls %}
+    <div class="url-item">
+      <div><b>{{u.domain}}</b><small>{{u.url}}</small></div>
+      <strong>{{u.score}}/100</strong>
+    </div>
+    {% endfor %}
+    {% endif %}
+  </div>
+</section>
+
+<!-- Official National Cyber Crime 1930 / I4C Complaint Generator -->
+<section class="card complaint-card">
+  <div class="section-head">
+    <div>
+      <div class="title-row">
+        <span style="color:#ff5a6e;font-size:22px;">🛡</span>
+        <h2>National Cyber Crime Reporting (Helpline 1930 / I4C)</h2>
+      </div>
+      <p>Automated legal incident draft conforming to Ministry of Home Affairs / cybercrime.gov.in complaint specifications.</p>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-primary" id="copyComplaintBtn" style="font-size:12px;padding:8px 14px;">Copy Complaint Draft</button>
+      <a class="btn-helpline" href="https://cybercrime.gov.in" target="_blank" rel="noopener">Portal: cybercrime.gov.in →</a>
+    </div>
+  </div>
+
+  <div class="complaint-draft-box" id="complaintBox">{{ result.complaint_draft.complaint_draft }}</div>
+
+  <div class="complaint-meta-bar">
+    <span>Immediate Emergency Action:</span>
+    <b style="color:#ff8e9b;">Call Helpline 1930 within the 'Golden Hour'</b>
+    <span>to freeze fraudulent bank accounts / UPI transfers immediately.</span>
+  </div>
+</section>
+
+<!-- Analyzed Content with Forensic Hash -->
+<section class="card analyzed">
+  <div class="section-head">
+    <div>
+      <h2>Original Analyzed Payload</h2>
+      <p>SHA-256: <code style="color:var(--teal)">{{ result.evidence_sha256 }}</code></p>
+    </div>
+    <button class="link-btn" id="copyContent">Copy original content</button>
+  </div>
+  <pre id="analyzedText">{{ text }}</pre>
+</section>
+
+<div class="result-actions">
+  <a class="btn btn-primary" href="/">Analyze another payload →</a>
+  <a class="btn btn-ghost" href="/history">View scan history</a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const scanResult = {{ result|tojson }};
+const scanText = {{ text|tojson }};
+
+// Local scan history storage
+let h = JSON.parse(localStorage.getItem('scamshield_history') || '[]');
+h.unshift({
+  date: new Date().toLocaleString(),
+  risk: scanResult.risk,
+  level: scanResult.level,
+  type: scanResult.scam_type,
+  stage: scanResult.stage,
+  text: scanText,
+  incident_id: scanResult.incident_id
+});
+localStorage.setItem('scamshield_history', JSON.stringify(h.slice(0, 100)));
+
+// Action buttons
+document.getElementById('copyContent')?.addEventListener('click', () => {
+  navigator.clipboard?.writeText(scanText).then(() => window.showToast?.('Payload copied to clipboard'));
+});
+
+document.getElementById('copyComplaintBtn')?.addEventListener('click', () => {
+  const draft = document.getElementById('complaintBox')?.innerText || '';
+  navigator.clipboard?.writeText(draft).then(() => window.showToast?.('1930 Cybercrime complaint draft copied!'));
+});
+
+document.getElementById('printReportBtn')?.addEventListener('click', () => {
+  window.print();
+});
+</script>
+{% endblock %}

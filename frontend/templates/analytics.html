@@ -1,0 +1,3 @@
+{% extends 'base.html' %}{% set active_page='analytics' %}{% set page_name='Analytics' %}
+{% block title %}ScamShield — Analytics{% endblock %}
+{% block content %}<div class="page-heading"><div><div class="eyebrow">SECURITY OVERVIEW</div><h1>Analytics</h1><p>Understand the scans performed in this browser.</p></div><a class="btn btn-primary" href="/">New scan →</a></div><div class="metric-grid" id="metrics"></div><section class="analytics-grid"><div class="card"><div class="title-row"><h2>Risk distribution</h2></div><div id="riskBars"></div></div><div class="card"><div class="title-row"><h2>Scam types</h2></div><div id="typeBars"></div></div></section>{% endblock %}{% block scripts %}<script src="{{ url_for('static',filename='js/pages.js') }}"></script>{% endblock %}

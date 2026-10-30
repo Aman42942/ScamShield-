@@ -1,0 +1,9 @@
+{
+  "scikit_learn_version": "1.8.0",
+  "train_rows": 72,
+  "test_rows": 18,
+  "classes": [
+    "legitimate",
+    "scam"
+  ]
+}

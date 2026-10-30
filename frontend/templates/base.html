@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07111f">
+  <title>{% block title %}ScamShield{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="/">
+        <span class="brand-icon">✓</span>
+        <span><strong>ScamShield</strong><small>Detect. Understand. Stay Safe.</small></span>
+      </a>
+      <nav class="side-nav" aria-label="Main navigation">
+        <a href="/" class="nav-item {% if active_page=='home' %}active{% endif %}"><span>⌂</span>Home</a>
+        <a href="/history" class="nav-item {% if active_page=='history' %}active{% endif %}"><span>◷</span>History</a>
+        <a href="/analytics" class="nav-item {% if active_page=='analytics' %}active{% endif %}"><span>▥</span>Analytics</a>
+        <a href="/guide" class="nav-item {% if active_page=='guide' %}active{% endif %}"><span>◈</span>Safety Guide</a>
+        <a href="/about" class="nav-item {% if active_page=='about' %}active{% endif %}"><span>ⓘ</span>About</a>
+      </nav>
+<div class="sidebar-footer"><b>ScamShield</b><span>v1.0.0</span><p>A safer digital world starts with awareness.</p></div>
+    </aside>
+
+    <div class="main-area">
+      <header class="topbar">
+        <button class="icon-btn mobile-menu" id="menuBtn" aria-label="Open menu">☰</button>
+        <div class="breadcrumb">ScamShield <span>/</span> {{ page_name|default('Dashboard') }}</div>
+        <div class="top-actions">
+          <button class="icon-btn" id="themeBtn" title="Toggle theme">☾</button>
+          <div class="account-menu-wrap">
+            <button class="avatar" id="accountMenuBtn" aria-label="Open account menu" aria-expanded="false">{{ (current_user.name[:1] if current_user else 'U')|upper }}</button>
+            <div class="account-menu" id="accountMenu" hidden>
+              {% if current_user %}
+                <div class="account-menu-user"><strong>{{ current_user.name }}</strong><small>{{ current_user.email }}</small></div>
+                <a href="/account">Manage account</a>
+                <form method="post" action="/logout"><button type="submit" class="account-menu-logout">Log out</button></form>
+              {% else %}
+                <div class="account-menu-user"><strong>Guest account</strong><small>Sign in to manage your profile</small></div>
+                <a href="/login">Log in</a>
+                <a href="/register">Create account</a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="page-content">
+        {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}<div class="flash-stack">{% for category, message in messages %}<div class="flash-message {{ category }}">{{ message }}</div>{% endfor %}</div>{% endif %}{% endwith %}
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+  <div id="toast" class="toast" role="status"></div>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

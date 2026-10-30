@@ -1,0 +1,17 @@
+SCAMSHIELD BASELINE EVALUATION
+
+Scikit-learn version: 1.8.0
+Accuracy: 0.8333
+
+              precision    recall  f1-score   support
+
+  legitimate       1.00      0.67      0.80         9
+        scam       0.75      1.00      0.86         9
+
+    accuracy                           0.83        18
+   macro avg       0.88      0.83      0.83        18
+weighted avg       0.88      0.83      0.83        18
+
+Confusion Matrix:
+[[6 3]
+ [0 9]]

@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% set active_page='home' %}{% set page_name='Dashboard' %}
+{% block title %}ScamShield — Dashboard{% endblock %}
+{% block content %}
+<section class="hero-grid">
+  <div class="hero-copy">
+    <div class="eyebrow">● AI-POWERED SCAM DETECTION</div>
+    <h1>Detect scams.<br><span>Understand the stage.</span></h1>
+    <p>Analyze messages, emails, conversations and URLs using machine learning and explainable signals.</p>
+    <div class="hero-actions"><a class="btn btn-primary" href="#scanner">Start a scan →</a><a class="btn btn-ghost" href="/guide">Learn how it works</a></div>
+  </div>
+  <div class="hero-visual"><div class="shield">✓</div><div class="orbit orbit-a"></div><div class="orbit orbit-b"></div><span class="float-chip chip-a">◉ NLP</span><span class="float-chip chip-b">↗ URL</span><span class="float-chip chip-c">✓ Explainable</span></div>
+</section>
+
+{% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+
+<section class="dashboard-grid" id="scanner">
+  <div class="scanner-card card">
+    <div class="section-head"><div><div class="title-row"><span class="spark">✦</span><h2>Analyze suspicious content</h2></div><p>Select an input type, paste the content, and get an instant analysis.</p></div><button class="help-btn" data-toast="Choose the input that best matches your content. The detector combines ML and explainable rules.">? Need help</button></div>
+    <div class="input-tabs" role="tablist">
+      {% for t,label,sub,icon in [('message','Message','SMS / WhatsApp / DM','●'),('email','Email','Email body + links','✉'),('conversation','Conversation','Multi-message chat','◉'),('url','URL','Link-focused scan','↗')] %}
+      <button type="button" class="input-tab {% if loop.first %}active{% endif %}" data-type="{{t}}"><span class="tab-icon">{{icon}}</span><span><b>{{label}}</b><small>{{sub}}</small></span><i>✓</i></button>
+      {% endfor %}
+    </div>
+    <form method="post" action="/analyze" id="scanForm">
+      <input type="hidden" name="input_type" id="input_type" value="message">
+      <div class="textarea-wrap"><textarea id="content" name="content" maxlength="5000" placeholder="Paste suspicious content here...">{{ previous or '' }}</textarea><div class="textarea-footer"><button type="button" class="upload-btn" id="uploadBtn">⌑ Upload file</button><input type="file" id="fileInput" accept=".txt,.eml,.csv" hidden><span id="counter">0 / 5000 characters</span></div></div>
+      <div class="example-line"><span><b>Example:</b> <span id="inlineExample">Your bank account will be suspended. Click here to verify.</span></span><button type="button" class="link-btn" id="useExample">Use example</button></div>
+      <div class="scan-footer"><span>Analysis combines ML + rules + URL signals</span><button class="btn btn-analyze" type="submit">Analyze Threat <span>→</span></button></div>
+    </form>
+  </div>
+
+  <aside class="right-stack">
+    <div class="side-card card"><div class="side-card-title"><span class="robot">◉</span><h3>Multi-signal engine</h3></div><ul class="check-list"><li>Text analysis (NLP)</li><li>URL analysis</li><li>Behavioral patterns</li><li>Explainable results</li></ul></div>
+    <div class="side-card card"><div class="side-card-title"><span class="bulb">✦</span><h3>Why use ScamShield?</h3></div><ul class="check-list"><li>Detect scam or legitimate content</li><li>Identify scam type</li><li>Understand the scam stage</li><li>Receive safety recommendations</li></ul></div>
+  </aside>
+</section>
+
+<section class="demo-section card"><div class="section-head"><div><div class="title-row"><span class="target">◉</span><h2>Try demo cases</h2></div><p>Click an example to see how ScamShield works.</p></div><button class="link-btn" data-toast="More examples can be added to data/demo-cases.js">View more examples →</button></div>
+<div class="demo-grid">
+{% for item in [
+('Banking Scam','Your account will be suspended. Verify now...','bank','Bank'),
+('Job Scam','Work from home! Earn ₹50,000 per month...','job','Job'),
+('Lottery Scam','Congratulations! You have won a prize...','lottery','Lottery'),
+('Delivery Scam','Your package is on hold. Click to track...','delivery','Delivery'),
+('Tech Support','Your computer is infected. Call this number...','tech','Tech'),
+('Legitimate','Hey, are we still meeting tomorrow?','legit','Legitimate')]
+%}
+<div class="demo-card {{item[2]}}"><div class="demo-icon">{{ '⌁' if item[2]=='bank' else '▣' if item[2]=='job' else '✦' if item[2]=='lottery' else '▰' if item[2]=='delivery' else '▤' if item[2]=='tech' else '✓' }}</div><b>{{item[0]}}</b><p>{{item[1]}}</p><button type="button" class="demo-btn" data-demo="{{item[0]}}">Try Example →</button></div>
+{% endfor %}
+</div></section>
+
+<section class="lower-grid"><div class="mini-card card"><span class="mini-icon">▥</span><div><b>Your scans stay private</b><p>Scan history is stored locally in your browser for this prototype.</p></div></div><div class="mini-card card"><span class="mini-icon">◈</span><div><b>Explainable by design</b><p>See the red flags and stage signals behind each result.</p></div></div></section>
+{% endblock %}

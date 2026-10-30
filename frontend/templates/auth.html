@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}{% if mode == 'login' %}Log in{% else %}Create account{% endif %} · ScamShield{% endblock %}
+{% block content %}
+<section class="auth-layout">
+  <div class="auth-card">
+    <div class="auth-mark">S</div>
+    {% if mode == 'login' %}
+      <p class="eyebrow">WELCOME BACK</p><h1>Log in to ScamShield</h1>
+      <p class="muted">Manage your profile and keep your workspace personal.</p>
+      <form method="post" action="/login" class="auth-form">
+        <label for="email">Email address</label><input id="email" name="email" type="email" autocomplete="email" required value="{{ email|default('') }}" placeholder="you@example.com">
+        <label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" required placeholder="At least 8 characters">
+        <button class="primary-btn" type="submit">Log in</button>
+      </form>
+      <p class="auth-switch">New to ScamShield? <a href="/register">Create an account</a></p>
+    {% else %}
+      <p class="eyebrow">GET STARTED</p><h1>Create your account</h1>
+      <p class="muted">Create a local account to manage your ScamShield profile.</p>
+      <form method="post" action="/register" class="auth-form">
+        <label for="name">Display name</label><input id="name" name="name" autocomplete="name" required minlength="2" maxlength="80" value="{{ name|default('') }}" placeholder="Your name">
+        <label for="email">Email address</label><input id="email" name="email" type="email" autocomplete="email" required value="{{ email|default('') }}" placeholder="you@example.com">
+        <label for="password">Password</label><input id="password" name="password" type="password" autocomplete="new-password" minlength="8" required placeholder="At least 8 characters">
+        <label for="confirm_password">Confirm password</label><input id="confirm_password" name="confirm_password" type="password" autocomplete="new-password" minlength="8" required placeholder="Re-enter password">
+        <button class="primary-btn" type="submit">Create account</button>
+      </form>
+      <p class="auth-switch">Already have an account? <a href="/login">Log in</a></p>
+    {% endif %}
+    <p class="auth-note">Demo/local account system. Use a unique password; do not reuse a sensitive real-world password.</p>
+  </div>
+</section>
+{% endblock %}
