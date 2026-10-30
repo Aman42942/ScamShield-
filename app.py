@@ -367,11 +367,16 @@ def about():
 
 
 if __name__ == "__main__":
-    url = "http://127.0.0.1:5000"
+    port = int(os.environ.get("PORT", 5000))
+    is_cloud = bool(os.environ.get("PORT"))
+    host = "0.0.0.0" if is_cloud else "127.0.0.1"
+    url = f"http://127.0.0.1:{port}"
 
-    # Open the browser shortly after Flask starts. The reloader remains disabled
-    # so this also works in Windows IDE/embedded-console environments.
-    threading.Timer(1.2, lambda: webbrowser.open(url)).start()
+    if not is_cloud:
+        try:
+            threading.Timer(1.2, lambda: webbrowser.open(url)).start()
+        except Exception:
+            pass
 
     print("=" * 60)
     print("ScamShield is starting...")
@@ -379,4 +384,4 @@ if __name__ == "__main__":
     print("Press CTRL+C to stop the server.")
     print("=" * 60)
 
-    app.run(host="127.0.0.1", port=5000, debug=False, use_reloader=False)
+    app.run(host=host, port=port, debug=False, use_reloader=False)
